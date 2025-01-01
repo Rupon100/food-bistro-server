@@ -15,7 +15,7 @@ app.get('/', (req, res) => {
 
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 // const uri = `mongodb+srv://${process.env.DB_KEY}:${process.env.DB_PASS}@cluster0.cne3f.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 const uri = `mongodb+srv://${process.env.DB_KEY}:${process.env.DB_PASS}@cluster0.cne3f.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -36,6 +36,7 @@ async function run() {
 
     const menuCollection = client.db("bistroDB").collection("menu");;
     const reviewsCollection = client.db("bistroDB").collection("reviews");;
+    const cartsCollection = client.db("bistroDB").collection("carts");;
 
 
     app.get('/menu', async(req,res) => {
@@ -46,6 +47,28 @@ async function run() {
     app.get('/reviews', async(req, res) => {
         const result = await reviewsCollection.find().toArray();
         res.send(result);
+    })
+
+
+    // carts collections
+    app.get('/carts', async(req, res) => {
+      const email = req.query.email;
+      const query = {email: email};
+      const result = await cartsCollection.find(query).toArray();
+      res.send(result);
+    })
+
+    app.post('/carts', async(req, res) => {
+      const cartItem = req.body;
+      const result = await cartsCollection.insertOne(cartItem);
+      res.send(result);
+    })
+
+    app.delete('/cart/:id', async(req, res) => {
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await cartsCollection.deleteOne(query);
+      res.send(result);
     })
 
 
@@ -65,3 +88,15 @@ run().catch(console.dir);
 app.listen(port, () => {
     console.log("Running port: ", port);
 });
+
+/**
+ * ---------------------------------
+ * naming convention
+ * ---------------------------------
+ * app.get('/users')
+ * app.get('/users/:id')
+ * app.post('/users')
+ * app.put('/users/:id')
+ * app.patch('/users/:id')
+ * app.delete('/users/:id')
+*/
